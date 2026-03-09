@@ -9,7 +9,7 @@ export interface AgentConfig {
   rpcUrl: string;
   agentWalletAddress: string;
   privateKey: Hex;
-  kv: Deno.Kv;
+  usedPayments: Set<string>;
 }
 
 export function createMcpServer(config: AgentConfig): McpServer {
@@ -125,7 +125,7 @@ export function createMcpServer(config: AgentConfig): McpServer {
           privateKey: config.privateKey,
           agentWalletAddress: config.agentWalletAddress,
           rpcUrl: config.rpcUrl,
-          kv: config.kv,
+          usedPayments: config.usedPayments,
         });
 
         return {

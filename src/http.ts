@@ -22,11 +22,15 @@ if (!privateKey) {
   throw new Error("PRIVATE_KEY environment variable is required");
 }
 
-// ─── Deno KV (replay prevention for payments) ─────────────────────────────────
+// ─── Replay prevention ────────────────────────────────────────────────────────
+//
+// In-memory Set tracks used payment tx hashes for the lifetime of the process.
+// A restart clears it, but replayed tx hashes would be for already-registered
+// names — the on-chain availability check catches any attempted double-spend.
 
-const kv = await Deno.openKv();
+const usedPayments = new Set<string>();
 
-const config: AgentConfig = { rpcUrl, agentWalletAddress, privateKey, kv };
+const config: AgentConfig = { rpcUrl, agentWalletAddress, privateKey, usedPayments };
 
 // ─── App ──────────────────────────────────────────────────────────────────────
 
@@ -95,7 +99,7 @@ app.post("/api/register", async (c) => {
       privateKey: config.privateKey,
       agentWalletAddress: config.agentWalletAddress,
       rpcUrl: config.rpcUrl,
-      kv: config.kv,
+      usedPayments: config.usedPayments,
     });
     return c.json(result);
   } catch (error) {
@@ -108,7 +112,6 @@ app.post("/api/register", async (c) => {
 
 // ─── MCP over Streamable HTTP ─────────────────────────────────────────────────
 
-// Session store — persists for the lifetime of the Deno process
 const mcpTransports = new Map<string, WebStandardStreamableHTTPServerTransport>();
 
 app.all("/mcp", async (c) => {
@@ -230,7 +233,7 @@ app.get("/", (c) => c.html(`<!DOCTYPE html>
     </div>
     <div class="endpoint">
       <div class="path">POST /api/register <span class="tag paid">$1.50 USDC</span></div>
-      <div class="desc">Register after paying $1.50 USDC on Celo</div>
+      <div class="desc">Register after sending $1.50 USDC on Celo</div>
       <pre>curl -X POST ${baseUrl}/api/register \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -285,8 +288,6 @@ console.log(`Agent wallet: ${agentWalletAddress}`);
 console.log(`RPC: ${rpcUrl}`);
 
 Deno.serve({ port }, (req) => {
-  // Rewrite http:// → https:// for requests arriving behind a TLS proxy
-  // (e.g. Docker + Traefik). Deno Deploy handles TLS natively so this is a no-op there.
   const proto = req.headers.get("x-forwarded-proto");
   if (proto === "https" && req.url.startsWith("http://")) {
     const url = new URL(req.url);

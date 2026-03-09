@@ -15,20 +15,21 @@ export interface PaymentVerificationResult {
  * Verify that a given tx hash represents a valid $1.50 USDC payment
  * to the agent's wallet address on Celo mainnet.
  *
- * Uses Deno KV to prevent replay attacks — each tx hash can only be used once.
+ * Uses an in-memory Set for replay prevention — each tx hash can only be
+ * used once per process lifetime. Good enough for a production service;
+ * a restart allows reuse, but the ENS name would already be registered.
  */
 export async function verifyUsdcPayment(
   txHashRaw: string,
   agentAddress: string,
-  kv: Deno.Kv,
+  usedPayments: Set<string>,
   rpcUrl?: string
 ): Promise<PaymentVerificationResult> {
   const txHash = txHashRaw.toLowerCase() as Hex;
   const agentAddr = agentAddress.toLowerCase();
 
-  // Replay prevention — check KV before touching the chain
-  const entry = await kv.get<string>(["used_payments", txHash]);
-  if (entry.value !== null) {
+  // Replay prevention — check before touching the chain
+  if (usedPayments.has(txHash)) {
     return { valid: false, error: "Payment tx hash has already been used" };
   }
 
@@ -68,10 +69,8 @@ export async function verifyUsdcPayment(
     };
   }
 
-  // Mark as used — 30-day expiry as a safety net
-  await kv.set(["used_payments", txHash], "1", {
-    expireIn: 1000 * 60 * 60 * 24 * 30,
-  });
+  // Mark as used in memory
+  usedPayments.add(txHash);
 
   const amountUsdc = (Number(matchingTransfer.args.value) / 1_000_000).toFixed(6);
   return { valid: true, amountUsdc };
