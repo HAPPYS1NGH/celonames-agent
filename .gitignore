@@ -1,0 +1,6 @@
+.env
+node_modules/
+.deno-kv/
+*.db
+*.db-shm
+*.db-wal

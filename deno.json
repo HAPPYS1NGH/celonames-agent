@@ -1,0 +1,23 @@
+{
+  "tasks": {
+    "http": "deno run --env --allow-net --allow-env --allow-read src/http.ts",
+    "test": "deno test --env --allow-net --allow-env --allow-read",
+    "register": "deno run --env --allow-net --allow-env --allow-read --allow-write scripts/register.ts",
+    "inspector": "BROWSER=none npx @modelcontextprotocol/inspector --cli http://localhost:3000/mcp"
+  },
+  "imports": {
+    "hono": "npm:hono@4",
+    "hono/deno": "npm:hono@4/deno",
+    "viem": "npm:viem@2",
+    "viem/chains": "npm:viem@2/chains",
+    "viem/accounts": "npm:viem@2/accounts",
+    "@modelcontextprotocol/sdk/server/mcp.js": "npm:@modelcontextprotocol/sdk@1/server/mcp.js",
+    "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js": "npm:@modelcontextprotocol/sdk@1/server/webStandardStreamableHttp.js",
+    "zod": "npm:zod@3",
+    "agent0-sdk": "npm:agent0-sdk"
+  },
+  "nodeModulesDir": "auto",
+  "compilerOptions": {
+    "strict": true
+  }
+}

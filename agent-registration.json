@@ -1,0 +1,28 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "Celo Names Agent",
+  "description": "Registers .celo.eth subnames for AI agents on Celo mainnet. Pay $1.50 USDC on Celo, get a 10+ character .celo.eth name with your address record set. Supports ENSIP-25 text records for linking ENS names to ERC-8004 agent identities.",
+  "image": "https://celonames.example.com/icon.png",
+  "services": [
+    {
+      "name": "MCP",
+      "endpoint": "https://celonames.example.com/mcp",
+      "version": "2025-03-09",
+      "mcpTools": ["checkAvailability", "getRegistrationPrice", "registerName"]
+    },
+    {
+      "name": "web",
+      "endpoint": "https://celonames.example.com"
+    }
+  ],
+  "x402Support": false,
+  "active": false,
+  "registrations": [],
+  "supportedTrust": ["reputation"],
+  "_notes": {
+    "active": "Set to true after deploying to production",
+    "registrations": "Fill in after running: deno task register",
+    "image": "Replace placeholder URL with your real icon URL",
+    "services": "Replace celonames.example.com with your real domain"
+  }
+}
