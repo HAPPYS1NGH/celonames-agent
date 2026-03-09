@@ -1,4 +1,9 @@
 {
+  "deploy": {
+    "project": "celonames-agent",
+    "entrypoint": "src/http.ts",
+    "exclude": ["**/.env", "**/node_modules"]
+  },
   "tasks": {
     "http": "deno run --env --allow-net --allow-env --allow-read src/http.ts",
     "test": "deno test --env --allow-net --allow-env --allow-read",
